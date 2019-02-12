@@ -1,0 +1,175 @@
+﻿@model EdmxPractiseApplication.Models.Book
+
+@{
+    ViewBag.Title = "";
+}
+
+<h2>AUthor's Book</h2>
+
+
+@using (Html.BeginForm())
+{
+    @Html.AntiForgeryToken()
+
+    <div class="form-horizontal">
+
+        <hr />
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.BookAuthor, new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @*@Html.DropDownListFor(model => model.BookAuthor, new SelectList(ViewBag.Authors, "AuthorName", "AuthorName"), "--Select Author--", new { htmlAttributes = new { @class = "form-control" } })*@
+                
+                @Html.EditorFor(model => model.BookAuthor)
+                @Html.ValidationMessageFor(model => model.BookAuthor)
+            </div>
+        </div>
+
+        <hr />
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.BookName, new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.DropDownListFor(model => model.BookName, new SelectList(ViewBag.Books, "BookId", "BookName"), "----", new { htmlAttributes = new { @class = "form-control" } })
+               
+                @Html.ValidationMessageFor(model => model.BookName)
+            </div>
+        </div>
+   
+    </div>
+}
+
+
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+
+    <script>
+        @*$(document).ready(function() {
+            //$("#BookName").empty();
+            $("#AuthorName").change(function() {
+
+                document.alert("sfdsfsd");
+                var authorName = $("#AuthorName").val();
+                var data = { AuthorName: authorName };
+                $.ajax({
+                    type: "POST",
+                    url: '@Url.Action("BookList", "Books")',
+                    contentType: "application/json;charset=utf-8",
+                    data: JSON.stringify(data),
+                    //data: data,
+                    dataType: "json",
+                    success: function(data) {
+                        $.each(data,
+                            function(kye, value) {
+                                $("#BookName").append('<option value=' +
+                                    value.BookName +
+                                    '>' +
+                                    value.BookName +
+                                    '</option>');
+                            });
+                    }
+
+
+                });
+            });
+        });*@
+
+
+
+
+
+
+        $(document).ready(function () {
+
+          
+            $("#BookName").empty();
+
+      
+
+            $("#BookAuthor").autocomplete({
+                source: function (request, response) {
+                    $.ajax({
+                        type: "POST",
+                       
+                        url: '@Url.Action("AuthorList", "Books")',
+                        dataType: "json",
+                        data: { Prefix: request.term },
+                        success: function (data) {
+                            response($.map(data,
+                                function(item) {
+                                    return { label: item.AuthorName, value: item.AuthorName };
+
+                                }));
+
+                        }
+                    
+                    });
+
+                },
+                messages: {
+                    noResults: "",
+                    results: function (count) {
+                        return count + (count > 1 ? ' results' : ' result ') + ' found';
+                    }
+                }
+
+            });
+
+            @*$("#BookAuthor").autocomplete({
+                source: function (request, response) {
+                    $.ajax({
+                        url: '@Url.Action("AuthorList", "Books")',
+                        dataType: "json",
+                        data: {
+                            term: request.term
+                        },
+                        success: function (data) {
+                            response(data);
+                        }
+                    });
+                }
+            });*@
+
+           
+
+
+
+
+
+
+
+            $("#BookAuthor").change(function () {
+
+                var authorName = $("#BookAuthor").val();
+
+                var jsonData = { AuthorName: authorName }
+                $("#BookName").empty();
+                $.ajax({
+                    type: "POST",
+                    url: '@Url.Action("BookList", "Books")',
+                    contentType: "application/json;charset=utf-8",
+                    data: JSON.stringify(jsonData),
+
+
+                    success: function (data) {
+                        $.each(data,
+                            function (key, value) {
+                                $("#BookName").append('<option value=' + value.BookId + '>' + value.BookName + '</option>');
+                            });
+
+                    },
+
+                    error: function () {
+                        alert("Save Failed");
+
+                    }
+
+
+                });
+            });
+
+        });
+
+    </script>
+}
